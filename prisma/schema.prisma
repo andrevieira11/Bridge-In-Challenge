@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Manager {
+  id          String     @id @default(cuid())
+  email       String     @unique
+  password    String
+  name        String
+  companyName String
+  createdAt   DateTime   @default(now())
+  magicLink   MagicLink?
+}
+
+model MagicLink {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  managerId String   @unique
+  manager   Manager  @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  reports   Report[]
+}
+
+model Report {
+  id           String    @id @default(cuid())
+  magicLinkId  String
+  magicLink    MagicLink @relation(fields: [magicLinkId], references: [id], onDelete: Cascade)
+  title        String
+  description  String
+  category     String
+  isAnonymous  Boolean   @default(true)
+  contactEmail String?
+  status       String    @default("new")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
